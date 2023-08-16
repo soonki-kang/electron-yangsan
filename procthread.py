@@ -1,19 +1,21 @@
-from lib2to3.pgen2.driver import Driver
-from PySide6.QtCore                     import  Signal, QThread
-from browserload                        import  browserLoad
-from loginsite                          import  loginSite
-from datetime                           import  datetime, timedelta
-from time                               import  sleep, time as timetime
-import random
+from PySide6.QtCore import Signal, QThread
+from browserload import browserLoad
+from loginsite import loginSite
+from datetime import datetime, timedelta
+from time import time as timetime, sleep
 import pause
-from selenium.webdriver.common.action_chains   import ActionChains
-from selenium.webdriver.common.by import By
+import random
 from selenium.webdriver.common.alert import Alert
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support.select import Select
 
-from myvar                              import  myVar       as  mv
+# import threading
+from selenium.webdriver.common.by import By
+# from selenium.webdriver.support.select import Select
+from jointhread import joinThread
+
+from myvar import myVar as mv
+
 
 class procThread(QThread):
     browserproc_signal = Signal(str)
@@ -22,159 +24,224 @@ class procThread(QThread):
     def __init__(self):
         super().__init__()
 
-    def return_mesg(self,mesg):
+    def return_mesg(self, mesg):
         self.browserproc_signal.emit(mesg)
 
-    def alert_check(self):
-        # print(f'time7 : {datetime.now().strftime("%H:%M:%S:%f")}')
-
-        try:
-            # 예약하기(window handle을 갖었는지 혹은 alert인지 검토)
-            rev_box = WebDriverWait(mv.DRIVER, 0.1).until(
-                EC.element_to_be_clickable((By.XPATH, '/html/body/div[1]/div/ul/li[1]/div/a'))
-            )
-            rev_box.click()
-
-            # b = input("예약하기 1............")
-            WebDriverWait(mv.DRIVER, 1).until(EC.alert_is_present())
-            mesg = Alert(mv.DRIVER).text
-            # Test
-            Alert(mv.DRIVER).accept()
-            # Alert(mv.DRIVER).dismiss()
-            self.browserproc_signal.emit(mesg)
-           
-            if mesg.find("예약을") >= 0:
-                
-                # 예약이 정상적으로 처리되었습니다
-                try:
-                    WebDriverWait(mv.DRIVER, 0.2).until(EC.alert_is_present())
-                    mesg = Alert(mv.DRIVER).text
-                    Alert(mv.DRIVER).accept()
-                    self.browserproc_signal.emit(mesg)
-                    if mesg.find("정상적") >= 0 :
-                        mv.isRUN = True
-                        return mv.isRUN
-                except Exception as e:
-                    self.browserproc_signal.emit(str(e))
-        except Exception as e:
-            self.browserproc_signal.emit(str(e))
-        mv.isRUN = False
-        return mv.isRUN
-
     def browserload_n_login(self):
-        #browser load
+        # browser load
         try:
             before_time = datetime.now().strftime("%H%M%S%f")[:-3]
             self.bl = browserLoad()
             now_time = datetime.now().strftime("%H%M%S%f")[:-3]
             response_time = int((int(now_time) - int(before_time)) / 1000)
             self.browserproc_signal.emit(f'🌍 응답 시간 : {response_time} ms')
-        except Exception as  e:
-            self.browserproc_signal.emit(e.message)
+        except Exception as e:
+            self.browserproc_signal.emit(e)
         self.bl.site_signal.connect(self.return_mesg)
         self.lg = loginSite()
         self.lg.login_signal.connect(self.return_mesg)
         self.lg.login()
 
+    def callthread(self, e, selectTime):
+        self.locals()['jt{}'.format(selectTime)] = joinThread(e, parent=self)
+        self.locals()['jt{}'.format(selectTime)
+                      ].joinsignal.connect(self.return_mesg)
+        self.locals()['jt{}'.format(selectTime)].start()
+
+    def callfunction(self, clickTee):
+        # print('.........callfunction.................')
+        try:
+            # tee  click
+            # clickTee.send_keys(Keys.ENTER)
+            # 1. 신청 click
+            clickTee.click()
+
+            # 2. 예약 안내
+            # 1번째 alert x월 x일 x코스 hh:mm타임을 예약하시겠습니까
+            mv.DRIVER.find_element(
+                By.XPATH, "//*[@id='cm_popup_content']/div[2]/div[1]/a/img").click()
+
+            # 3. 예약 확정 안내
+            # 예약이 확정되면 문자로 예약 내역이 발송됩니다.
+            try:
+                WebDriverWait(mv.DRIVER, 0.2).until(EC.alert_is_present())
+                mesg = Alert(mv.DRIVER).text
+                Alert(mv.DRIVER).accept()
+                # Alert(mv.DRIVER).dismiss()
+                self.browserproc_signal.emit(mesg)
+            except:
+                return False
+
+            # 예약을 click했는데 "예약 내역이 발송됩니다" mesg가 없을 경우
+            # 무조건 다시 select함"
+            if mesg.find("발송") < 0:
+                return False
+
+            # 4. 동시 예약 등으로 예약이 불가한 안내
+            # 예약하시겠습니까 accept후 다음 alert를 받았을 경우(동시예약등) 처리
+            # 안내가 없을 경우 정상적으로 예약됨.
+            try:
+                WebDriverWait(mv.DRIVER, 0.2).until(EC.alert_is_present())
+                mesg = Alert(mv.DRIVER).text
+                Alert(mv.DRIVER).accept()
+                self.browserproc_signal.emit(f"{mesg}")
+                return False
+            except:
+                self.browserproc_signal.emit("예쓸!!!")
+                return True
+
+        except Exception as e:
+            # print(f'...............error. : {e}')
+            self.browserproc_signal.emit(e)
+            return False
+
+    # script를 실행하여  예약날자로 진입
+    def peekDate(self):
+        # 예약 일자 string 변환
+        date_str = mv.USER_REVDATE.strftime("%Y%m%d")
+        # mv.DRIVER.execute_script("timefrom_change('20220118','1','3','','00','T')")
+        # print("예약일자 : ", date_str)
+        holiday = "2" if (mv.REV_WEEK == 6 or mv.REV_WEEK == 7) else "1"
+        week_no = 1 if (mv.REV_WEEK == 7) else mv.REV_WEEK + 1
+        week_no_str = format(week_no, "1")
+
+        # 날자 선택(javascript 실행)
+        script_str = "timefrom_change('" + date_str + "','" + \
+            holiday + "','" + week_no_str + "',',','00','T')"
+        # print("script : ", script_str)
+        # 날자 선택
+        mv.DRIVER.execute_script(script_str)
+        sleep(0.2)
+        # print("date select :", mv.DRIVER.window_handles, datetime.today())
+
+    def openandselect(self):
+        # 예약 실패 후 loop 반복 지점
+        setTimeOut = timetime() + (60 * 1)
+        # tee가 나타날때까지 최대 1분 동안 loop
+        self.browserproc_signal.emit(
+            f"Open 대기 ..... " + datetime.today().strftime("%H:%M:%S"))
+
+        isData = False
+        while timetime() < setTimeOut:
+
+            try:
+                self.teeElements = WebDriverWait(mv.DRIVER, 0.1).until(
+                    # EC.presence_of_all_elements_located((By.XPATH, "//*[@id=contains(text(), 'timeresbtn')]/img"))
+                    EC.presence_of_all_elements_located(
+                        (By.XPATH, "//*[starts-with(@id, 'timeresbtn')]"))
+                )
+                isData = True
+                # self.current_window = mv.DRIVER.current_window_handle
+                break
+            except:
+                # ActionChains(mv.DRIVER).click(mv.DRIVER.find_element(By.XPATH, tee_course_str2)).perform()
+                self.browserproc_signal.emit(
+                    f"Open 대기 ..... " + datetime.today().strftime("%H:%M:%S"))
+                mv.DRIVER.refresh()
+                # sleep(0.1)
+                continue
+
+        if (not isData):
+            self.browserproc_signal.emit("예약일자 혹은 서버를 확인하세요!!!")
+            mv.isRUN = False
+            return mv.isRUN
+
+        if len(self.teeElements) < 1:
+            self.browserproc_signal.emit("제공된 tee가 없습니다.")
+            mv.isRUN = False
+            return mv.isRUN
+        else:
+            self.browserproc_signal.emit(
+                f"총 {len(self.teeElements)} 개의 tee가 있습니다!")
+            mv.isRUN = True
+            return mv.isRUN
 
     def proc_tee(self):
 
-        print(f'time1 : {datetime.now().strftime("%H:%M:%S:%f")}')
+        # 비즈니스 예약, 일반 예약 click
+        if mv.USER_REV_ID == 0:
+            # print('비즈니스........')
+            mv.DRIVER.find_element(
+                By.XPATH, '//*[@id="cm_reservation"]/ul/li[1]/a').click()
+        elif mv.USER_REV_ID == 1:
+            # print('일반........')
+            mv.DRIVER.find_element(
+                By.XPATH, '//*[@id="cm_reservation"]/ul/li[3]/a').click()
+        else:
+            pass
 
-        # 예약하기 btn
-        actions = ActionChains(mv.DRIVER)
-        reserbtn = mv.DRIVER.find_element(By.XPATH, '//*[@id="main_quick"]/li[1]/a/img')
-        actions.click(reserbtn)
-        actions.perform()
-        print(f'time2 : {datetime.now().strftime("%H:%M:%S:%f")}')
+        # 날자를 넣고 script실행
+        #print(f"peekDate ..... " + datetime.today().strftime("%H:%M:%S"))
+        self.peekDate()
+        #print(f"peekDate after ..... " + datetime.today().strftime("%H:%M:%S"))
 
-        # 새로 고침 및 예약 일자 click
-        # Test
-        # mv.AFTER_CNT = 8
-        # print("date cnt ............", mv.TODAY_INDEX, mv.AFTER_CNT)
-        query_str = mv.DATE_TABLE[mv.TODAY_INDEX + mv.AFTER_CNT]
-        b_date = mv.DRIVER.find_element(By.XPATH, query_str).get_attribute('innerText')
-        self.browserproc_signal.emit(f"{b_date}일 예약을 시도 합니다.....")
-        
-        # 새로고침 및 날자가 booking 가능한지
-        # date_actions = ActionChains(mv.DRIVER)
-        # reserbtn = mv.DRIVER.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/a/button')
-        # date_actions.click(reserbtn)
-        # day_btn = mv.DRIVER.find_element(By.XPATH, query_str)
-        # date_actions.click(day_btn)
-        # date_actions.perform()
-        
+        # 시간을 선택하기 위한 String value 설정
+        # 05:00 ~ 07:00
+        # strRevFmTime = '{:02d}'.format(mv.USER_FMTIME + 4) + '00'
+        # strRevToTime = '{:02d}'.format(mv.USER_TOTIME + 4) + '59'
+        # if mv.USER_TOTIME == 0:
+        #     strRevToTime = '{:02d}'.format(19) + '00'
+        strRevFmTime = (mv.USER_FMTIME + 4) * 100
+        strRevToTime = (mv.USER_TOTIME + 4) * 100 + 59
+        n = 0
+        if mv.USER_TOTIME == 0:
+            strRevToTime = 1959
+
         while True:
-            try:
+            isRetry = False
+            if not self.openandselect():
+                return mv.isRUN
 
-                # 새로 고침
-                mv.DRIVER.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/a/button').click()
-                # sleep(0.1)
-                none_link =mv.DRIVER.find_element(By.XPATH, query_str).get_attribute('class')
-                # print(f'time3 : {datetime.now().strftime("%H:%M:%S:%f")}')
-                if none_link == 'book':
-                    mv.DRIVER.find_element(By.XPATH, query_str).click()
-                    break
-                continue
-            except Exception as e:
-                print(f"새로 고침 loop error {str(e)}")
-                mv.isRUN = False
-                return
+            random.shuffle(self.teeElements)  # tee list를 random으로 섞음.
+            for i, tee in enumerate(self.teeElements):
+                # javascript의 내용에서 시간 추출
+                selectTime = int(tee.get_attribute('href')[27:31])
+                selectCourse = int(tee.get_attribute('href')[23:24])
+                # 확인 print(f'time = {selectTime} index = {i}   length = {len(teeElements)}')
+                if (mv.USER_COURSE != 0):
+                    if (mv.USER_COURSE != selectCourse):
+                        # sleep(0.2)
+                        continue
 
-
-        # win_main_handle = mv.DRIVER.current_window_handle
-
-        # b = input(f"{mv.TODAY_INDEX}, {mv.AFTER_CNT}-------------------------------------------")
-
-        # select될때까지  반복
-        select_cnt = 0
-        
-        while select_cnt < 21:
-            # print(f'time4 : {datetime.now().strftime("%H:%M:%S:%f")}')
-            select_cnt += 1
-            # time choice
-            if mv.TEE_FM_INDEX == mv.TEE_TO_INDEX:
-                time_index = mv.TEE_FM_INDEX
-            else:
-                time_index = random.choice(range(mv.TEE_FM_INDEX, mv.TEE_TO_INDEX))
-            # course choice
-            if mv.USER_COURSE == 0:
-                course_index = random.choice((1,2,3))
-            else:
-                course_index = mv.USER_COURSE
-
-            try:
-                # print(f'time5 : {datetime.now().strftime("%H:%M:%S:%f")}')
-                # sleep(0.2)
-                query_str = f'/html/body/div[1]/div/table/tbody/tr/td[{course_index}]/table/tbody/tr[{time_index}]/td[2]/button'
-                none_link = mv.DRIVER.find_element(By.XPATH, query_str)
-                link_attr = none_link.get_attribute('class')
-                if link_attr.find('book2') >= 0:
-                    mv.DRIVER.find_element(By.XPATH, query_str).click()
-                    if self.alert_check() :
+                if (selectTime >= strRevFmTime and selectTime <= strRevToTime):
+                    teeimage = tee.find_element(By.CSS_SELECTOR, 'img[src]')
+                    n += 1
+                    if self.callfunction(teeimage):
+                        self.browserproc_signal.emit(f"🎆🎆🎆 예약이 성공하였습니다. 🎆🎆🎆")
+                        mv.isRUN = False
+                        return mv.isRUN
+                    else:
+                        self.browserproc_signal.emit("😥😥😥  재시도  😥😥😥")
+                        isRetry = True
                         break
-                # 새로 고침
-                sleep(0.2)
-                mv.DRIVER.find_element(By.XPATH, '/html/body/div[1]/div/div[2]/a/button').click()
-                # print(f'time6 : {datetime.now().strftime("%H:%M:%S:%f")}')
-                self.browserproc_signal.emit(f"{select_cnt}번째 시도.......")
+
+                    # sleep(0.01)
+                # self.browserproc_signal.emit(f"outside - tee {selectTime} pass, {i} 회 시도 " )
+
+            if isRetry:
+                # print('이것은 retry continue')
                 continue
-            except Exception as e:
-                print(f"새로 고침 loop error {str(e)}")
-                mv.isRUN = False
-                return
-       
+
+            mv.isRUN = False
+            break
+
+        self.browserproc_signal.emit("😞😞😞예약이 실패했습니다.😞😞😞")
+        return False
 
     # use pause until
     def run(self):
-        # time to seconds 3분전을 세팅함
+        # time to seconds 2분전을 세팅함
         base_date = datetime.combine(datetime.today(), mv.BASE_TIME)
         start_time = base_date - timedelta(minutes=2)
         pause.until(start_time)
         self.browserload_n_login()
 
-        start_time = base_date - timedelta(seconds=(2 + mv.DIFF_TIME))
+        # 5초 전에 무조건 시작
+        # start_time = base_date - timedelta(seconds=(4 + mv.DIFF_TIME))
+        start_time = base_date - timedelta(seconds=10)
+        #print(f"pause time ..... " + datetime.today().strftime("%H:%M:%S"))
         pause.until(start_time)
+        #print(f"proc_tee start ..... " + datetime.today().strftime("%H:%M:%S"))
         self.proc_tee()
         mv.DRIVER.quit()
         self.endofjob_signal.emit("작업이 종료되었습니다.")

@@ -1,1 +1,1 @@
-pyinstaller --onefile --noconsole --icon=.\asiad12.ico asiad.py
+pyinstaller --onefile --noconsole --icon=.\yscc5.ico yangsan.py

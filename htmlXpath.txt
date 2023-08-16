@@ -1,0 +1,128 @@
+session="b84c3ffa2af8e195e446460ac72696e3", element="77ec56b9-0ff6-4399-a143-9e734509ae45")>
+
+error message : 등록되지 않은 아이디입니다.
+
+<iframe id="iframe" name="iframe" src="Login.asp" scrolling="auto" frameborder="0" width="660" height="500"></iframe>
+
+회원구분 :           <input name="member_gubun" type="radio" value="01" checked="" style="border:0;">  value: 정회원:'01' 준회원:'02' 우대회원:'03' 콘도회원:'04'
+                       /html/body/table/tbody/tr[2]/td[2]/table/tbody/tr[2]/td/input[1]   : 정회원
+                       /html/body/table/tbody/tr[2]/td[2]/table/tbody/tr[2]/td/input[2]   : 준회원
+                       /html/body/table/tbody/tr[2]/td[2]/table/tbody/tr[2]/td/input[3]   : 우대회원
+                       /html/body/table/tbody/tr[2]/td[2]/table/tbody/tr[2]/td/input[4]   : 콘도회원
+                       
+아이디:              <input name="login_id" type="text" size="25" style="border:1 solid #DEDEDE; vertical-align:top; height:20px" tabindex="1">
+                         /html/body/table/tbody/tr[2]/td[2]/table/tbody/tr[6]/td[2]/input
+
+
+비밀번호:           <input name="login_pw" type="password" size="25" style="border:1 solid #DEDEDE; vertical-align:top; height:20px" tabindex="2">' 
+                      /html/body/table/tbody/tr[2]/td[2]/table/tbody/tr[7]/td[2]/input
+
+login button :     <td width="27%" rowspan="2" align="center">
+                      <input name="imageField2" type="image" src="/images/Member/btn_login.gif" width="80" height="25" border="0" style="border:0 "></td>
+                      /html/body/table/tbody/tr[2]/td[2]/table/tbody/tr[6]/td[3]/input
+
+
+LOGIN   :           <a href="/Member/view.asp?location=01"><img src="/images/btn_login.jpg" border="0"></a>
+                       /html/body/table/tbody/tr[1]/td/table[1]/tbody/tr[1]/td[2]/table/tbody/tr/td[7]/a
+
+
+LOGOUT :           <a href="/Reserve/view.asp?location=05"><img src="/images/btn_logout.jpg" width="38" height="9" border="0"></a>
+                       /html/body/table[1]/tbody/tr[1]/td/table[1]/tbody/tr[1]/td[2]/table/tbody/tr/td[7]/a/img
+
+
+<iframe id="iframe" src="/Reserve/Calendar.asp" scrolling="auto" frameborder="0" width="650" height="600"></iframe>
+최상위 element
+                       
+         날자 table :  /html/body/table/tbody/tr[1]/td[2]/table
+                         
+
+table: /html/body/table/tbody/tr[1]/td[2]/table
+body: /html/body/table/tbody/tr[1]/td[2]/table/tbody
+
+날자 td :            <td valign="top" bgcolor="#F7FBF3" height="60"><font color="#005EB6">10/08</font><br>
+			<div align="center">
+			   <a href="javascript:date_check('2022-10-08','2','00')">   ✨ '1': 평일 '2':토요일 '3': 일요일
+                                   <img src="/images/Reserve/icon_rese.gif" align="absbottom" border="0" title="3타임이 남아있습니다.">
+			   </a>
+			</div>
+		      </td>
+                      /html/body/table/tbody/tr[1]/td[2]/table/tbody/tr[4]/td[1]/div/a/img  <----- 선택하기 어렵다.
+
+날자 link:           /html/body/table/tbody/tr[1]/td[2]/table/tbody/tr[3]/td[3]/div/a
+                     -> javascript:date_check('yyyy-mm-dd', '1', '00')   '1': 평일  '2': 토요일   '3': 일요일
+
+빈날자:           <td valign="top" bgcolor="#F7FBF3" height="60"><font color="#555555">10/12</font><br>
+			<div align="center">
+  		        </div>
+		    </td>
+                   
+                    text를 찾는 방법 외에 다른 방법이 있는가? 
+                    page reload를 계속할 것인가 아니면 click를 계속 할것인가?????
+                    link가 나타날때까지 반복 click  link가 나타나면 link click
+                    selector:  body > table > tbody > tr:nth-child(1) > td:nth-child(2) > table > tbody > tr:nth-child(4) > td:nth-child(1) > div > a
+
+
+
+날자선택 image  /html/body/table/tbody/tr[1]/td[2]/table/tbody/tr[3]/td[3]/div/a/img
+                    <a href="javascript:date_check('2022-10-04','1','00')">
+                       <img src="/images/Reserve/icon_rese.gif" align="absbottom" border="0" title="22타임이 남아있습니다.">
+   		    </a>
+                 /html/body/table/tbody/tr[1]/td[2]/table/tbody/tr[4]/td[7]
+link의 xpath : /html/body/table/tbody/tr[1]/td[2]/table/tbody/tr[4]/td[7]/div/a
+        css    : body > table > tbody > tr:nth-child(1) > td:nth-child(2) > table > tbody > tr:nth-child(4) > td:nth-child(7) > div > a
+
+<iframe>
+                            <tr>
+				
+				<td align="center" style="color:blue">18:54</td>
+				     <td align="center">
+					<a href="javascript:incode('11','1854');"><img src="/images/Reserve/Btn_recept.gif" border="0"></a>  11:eden course  22: valley course
+			             </td>
+				</tr>
+
+tee element      endencourse : 1line :  /html/body/table/tbody/tr[3]/td[1]/table/tbody/tr[3]/td[1]
+                                                /html/body/table/tbody/tr[3]/td[1]/table/tbody/tr[3]/td[2]/a/img
+                                                <td align="center" style="color:blue">18:54</td>
+
+                    endencourse  : 2line:  /html/body/table/tbody/tr[3]/td[1]/table/tbody/tr[5]/td[1]
+                                               /html/body/table/tbody/tr[3]/td[1]/table/tbody/tr[5]/td[2]/a/img
+                                               /html/body/table/tbody/tr[3]/td[1]/table/tbody/tr[5]/td[2]/a
+                                               /html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[7]/td[2]/a
+                                               /html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/a
+                                               <td align="center" style="color:blue">19:20</td>
+
+                    velleycourse   " 1line: /html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[1]
+                                               /html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/a/img
+                                               <td align="center" style="color:blue">19:20</td>
+
+예약버튼:         /html/body/table[1]/tbody/tr[7]/td/input
+                           /html/body/table[1]/tbody/tr[7]/td/input
+뒤로가기:          /html/body/table[1]/tbody/tr[7]/td/a/img
+
+예약 버튼 후 alert ('류기선님 예약하시겠습니까?'   accept, cancel
+
+예약버튼 확인 후  alert (golf.edenvalley.co.kr 내용:
+                              성공적으로 예약되었습니다.       accept
+
+
+
+
+
+/html/body/table/tbody/tr[3]/td[1] : eden
+/html/body/table/tbody/tr[3]/td[1]/table/tbody/tr[3]/td[1]
+/html/body/table/tbody/tr[3]/td[1]/table/tbody/tr[3]/td[2]/a/img
+
+/html/body/table/tbody/tr[3]/td[2] : valley
+/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[1]
+/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/a
+/html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/a/img   
+/html/body/table/tbody        전체
+
+$x(//*[@id="list-overview"]/div[./descendant::div[@data-price<=20]] and [./div/a/div/div[@class='fruit'][contains(.,'Orange')]])
+                                          1         2         3         4
+                                01234567890123456789012345678901234567890123456789012345678901234567890
+                                2022-11-30일자 마루코스 06:16 타임을 예약하시겠습니까?
+<a id="timeresbtn_3_0616" href="javascript:subcmd('R','3','0616','마루', '2022년 11월 30일 (수요일)', '18홀', 'I', 'UNABLE', '140000', '120000', '', '', 'N', 'N', '', 'N')">
+<img src="/image/cm_reservation/time_live_list_btn_application.png" alt="신청[0616]"></a>
+
+

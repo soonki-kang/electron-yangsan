@@ -1,4 +1,4 @@
-from datetime               import datetime, time
+from datetime               import datetime
 from time                   import sleep
 from PySide6.QtCore         import QThread, Signal
 from myvar                  import myVar   as mv
